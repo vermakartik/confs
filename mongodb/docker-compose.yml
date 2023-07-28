@@ -1,0 +1,63 @@
+# docker run -dp 27017:27017 --name mongocms0 -v mongocms:/data/db -v /home/xhaxs/work/dockerconfs:/etc/mongo --network net_mongo_cms mongo:6.0.8 --config /etc/ mongod --replSet mongo_cms_rs --bind_ip localhost,mongocms0
+
+version: '3.1'
+services:
+  mongocms0: 
+    image: mongo:6.0.8
+    expose:
+      - 27017
+    ports:
+      - 30000:27017
+    configs: 
+      - mongo_conf
+    networks:
+      - mongo_db_net
+    volumes:
+      - mongo_main0:/data/db
+      - ./mongokey:/data/mongokey
+    entrypoint: ["mongod", "--replSet", "mongo_cms_rs", "--bind_ip_all", "--config", "mongo_conf"] 
+
+  mongocms1: 
+    image: mongo:6.0.8
+    expose:
+      - 27017
+    ports:
+      - 30001:27017
+    configs: 
+      - mongo_conf
+    networks:
+      - mongo_db_net
+    volumes:
+      - mongo_main1:/data/db
+      - ./mongokey:/data/mongokey
+    entrypoint: ["mongod", "--replSet", "mongo_cms_rs", "--bind_ip_all","--config", "mongo_conf"]
+
+  mongocms2: 
+    image: mongo:6.0.8
+    expose:
+      - 27017
+    ports:
+      - 30002:27017
+    configs: 
+      - mongo_conf
+    networks:
+      - mongo_db_net
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo@123
+    volumes:
+      - mongo_main2:/data/db
+      - ./mongokey:/data/mongokey
+    entrypoint: ["mongod", "--replSet", "mongo_cms_rs", "--bind_ip_all", "--config", "mongo_conf"]
+    
+volumes:
+  mongo_main0:
+  mongo_main1:
+  mongo_main2:
+  
+networks:
+  mongo_db_net:
+
+configs:
+  mongo_conf:
+    file: ./mongod.conf
